@@ -33,6 +33,21 @@ function useScrollStory() {
     }));
     const progressBar = document.getElementById("scroll-progress");
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const lazyScenes = new Set(["childhood", "youth", "adulthood", "old-age"]);
+    const artObserver = "IntersectionObserver" in window
+      ? new IntersectionObserver((entries, observer) => {
+          entries.forEach(({ isIntersecting, target }) => {
+            if (isIntersecting) {
+              target.dataset.assetsReady = "true";
+              observer.unobserve(target);
+            }
+          });
+        }, { rootMargin: "300px 0px" })
+      : null;
+    scenes.filter((scene) => lazyScenes.has(scene.dataset.scene)).forEach((scene) => {
+      if (artObserver) artObserver.observe(scene);
+      else scene.dataset.assetsReady = "true";
+    });
     let frame = 0;
     let lastTime = 0;
 
@@ -161,6 +176,7 @@ function useScrollStory() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       reducedMotion.removeEventListener("change", onMotionChange);
+      if (artObserver) artObserver.disconnect();
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
@@ -240,9 +256,9 @@ export function App() {
               <span className="gold-mark" aria-hidden="true" />
               <p className="hero-small">The same person.<br />A thousand meaningful moments.</p>
             </div>
-            <img className="chapter-landscape hero-landscape" src="/assets/ink-landscape.webp" alt="" aria-hidden="true" />
+            <img className="chapter-landscape hero-landscape" src="/assets/ink-landscape.webp" alt="" aria-hidden="true" decoding="async" />
             <div className="scene-art hero-art">
-              <img src="/assets/hero-family.webp" alt="A laughing little boy held by his mother beside his smiling father" />
+              <img src="/assets/hero-family.webp" alt="A laughing little boy held by his mother beside his smiling father" loading="eager" fetchPriority="high" decoding="async" />
             </div>
             <p className="hero-whisper">The people<br />we love<br />make life<br />extraordinary.</p>
             <ScrollHint />
@@ -258,8 +274,8 @@ export function App() {
               <div className="chapter-lines"><p>A world of firsts.</p><p>Small feet, big dreams.</p></div>
               <p className="chapter-aside">Curiosity turns ordinary days into adventures.</p>
             </div>
-            <img className="chapter-landscape childhood-landscape" src="/assets/ink-landscape.webp" alt="" aria-hidden="true" />
-            <img className="chapter-path" src="/assets/gold-path.webp" alt="" aria-hidden="true" />
+            <img className="chapter-landscape childhood-landscape" src="/assets/ink-landscape.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <img className="chapter-path" src="/assets/gold-path.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
             <div className="scene-art running-stage">
               <div className="runner" data-runner role="img" aria-label="The boy runs forward as the story scrolls"><span className="runner-sprite" aria-hidden="true" /></div>
             </div>
@@ -270,8 +286,8 @@ export function App() {
         <section id="youth" className="chapter chapter-youth" data-scene="youth" aria-labelledby="youth-title">
           <div className="chapter-sticky">
             <ChapterText number="02" label="The journey" title="Youth" lines={["Bigger questions.", "A wider world.", "The same hopeful heart."]} aside="We grow not just in years, but in perspective." />
-            <img className="chapter-landscape" src="/assets/ink-horizon.webp" alt="" aria-hidden="true" />
-            <img className="chapter-path" src="/assets/gold-path.webp" alt="" aria-hidden="true" />
+            <img className="chapter-landscape" src="/assets/ink-horizon.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <img className="chapter-path" src="/assets/gold-path.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
             <div className="scene-art youth-art">
               <div className="figure-sprite youth-sprite pose-sprite" data-poses="youth" role="img" aria-label="The boy, now a young man, walks toward a wider world"><span className="pose-frame" aria-hidden="true" /><span className="pose-frame" aria-hidden="true" /></div>
             </div>
@@ -287,8 +303,8 @@ export function App() {
               <div className="chapter-lines"><p>Responsibilities.</p><p>Relationships.</p><p>A fuller understanding<br />of what truly matters.</p></div>
               <p className="chapter-aside">A good life is built in the everyday.</p>
             </div>
-            <img className="chapter-landscape" src="/assets/ink-horizon.webp" alt="" aria-hidden="true" />
-            <img className="chapter-path" src="/assets/gold-path.webp" alt="" aria-hidden="true" />
+            <img className="chapter-landscape" src="/assets/ink-horizon.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <img className="chapter-path" src="/assets/gold-path.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
             <div className="scene-art adult-art">
               <div className="figure-sprite adult-sprite pose-sprite" data-poses="adult" role="img" aria-label="The man turns toward the horizon as the story scrolls"><span className="pose-frame" aria-hidden="true" /><span className="pose-frame" aria-hidden="true" /></div>
             </div>
@@ -298,8 +314,8 @@ export function App() {
         <section id="old-age" className="chapter chapter-oldage" data-scene="old-age" aria-labelledby="old-title">
           <div className="chapter-sticky">
             <ChapterText number="04" label="The journey" title="Old Age" lines={["A quieter pace.", "A deeper gratitude.", "The same wonder, still alive."]} aside="In the end, we remember what we gave, felt, and loved." />
-            <img className="chapter-landscape" src="/assets/ink-horizon.webp" alt="" aria-hidden="true" />
-            <img className="chapter-path" src="/assets/gold-path.webp" alt="" aria-hidden="true" />
+            <img className="chapter-landscape" src="/assets/ink-horizon.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <img className="chapter-path" src="/assets/gold-path.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
             <div className="scene-art old-art">
               <div className="figure-sprite old-sprite pose-sprite" data-poses="old" role="img" aria-label="The same man in old age walks slowly with a cane"><span className="pose-frame" aria-hidden="true" /><span className="pose-frame" aria-hidden="true" /></div>
             </div>
@@ -310,8 +326,8 @@ export function App() {
           <div className="chapter-sticky">
             <ChapterText number="05" label="The final chapter" title="The Final Breath" lines={["A gentle ending.", "A life, complete."]} aside="And so, he lets go — with peace, with love, with a life well lived." />
             <div className="scene-art ending-art">
-              <img className="final-man" src="/assets/final-breath.webp" alt="The elderly man rests in bed as his breathing slows and ends" />
-              <img className="breath-wisp" src="/assets/breath-wisp.webp" alt="" aria-hidden="true" />
+              <img className="final-man" src="/assets/final-breath.webp" alt="The elderly man rests in bed as his breathing slows and ends" loading="lazy" decoding="async" />
+              <img className="breath-wisp" src="/assets/breath-wisp.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
             </div>
             <p className="ending-stillness">A life ends.<br />Love remains.</p>
           </div>
@@ -324,7 +340,7 @@ export function App() {
             <p className="reveal-subtitle">Coffins &amp; memorial accessories</p>
             <p className="reveal-caption">Honouring every story. Always.</p>
             <div className="reveal-content">
-              <div className="reveal-art"><img src="/assets/memorial-still-life.webp" alt="An illustrated coffin with flowers and a candle" /></div>
+              <div className="reveal-art"><img src="/assets/memorial-still-life.webp" alt="An illustrated coffin with flowers and a candle" loading="lazy" decoding="async" /></div>
               <div className="contact-details">
                 <h3>Contact Us</h3>
                 <p>We are here to help you choose a meaningful farewell.</p>
